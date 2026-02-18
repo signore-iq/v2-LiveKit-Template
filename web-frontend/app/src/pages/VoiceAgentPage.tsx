@@ -39,7 +39,7 @@ export default function VoiceAgentPage({ mode }: VoiceAgentPageProps) {
     segments,
     connect,
     disconnect,
-  } = useLiveKitSession()
+  } = useLiveKitSession(mode)
 
   // Analyse BOTH streams independently
   const { rmsRef: micRmsRef } = useAudioAnalyser(audioContext, localMicStream, true)

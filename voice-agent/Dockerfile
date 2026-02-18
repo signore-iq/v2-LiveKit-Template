@@ -17,7 +17,7 @@ RUN uv run python -c "from livekit.plugins.silero import VAD; VAD.load()" || tru
 COPY . .
 RUN uv sync --frozen
 
-# Default: pipeline mode. Set AGENT_MODE=realtime for realtime mode.
+# Default fallback mode when room name does not include a mode prefix.
 ENV AGENT_MODE=pipeline
 
-CMD ["sh", "-c", "if [ \"$AGENT_MODE\" = \"realtime\" ]; then uv run python agent_realtime.py start; else uv run python agent.py start; fi"]
+CMD ["uv", "run", "python", "agent.py", "start"]

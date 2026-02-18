@@ -2,10 +2,11 @@ import { useCallback, useRef, useState } from 'react'
 import { Room, RoomEvent, Track } from 'livekit-client'
 import type { RemoteTrack, RemoteTrackPublication, RemoteParticipant, TranscriptionSegment, Participant } from 'livekit-client'
 import { fetchToken, createRoomOptions } from '@/lib/livekit'
+import type { AgentMode } from '@/lib/livekit'
 import type { ConnectionStatus } from '@/components/StatusBadge'
 import useTranscript from './useTranscript'
 
-export default function useLiveKitSession() {
+export default function useLiveKitSession(mode: AgentMode) {
   const [status, setStatus] = useState<ConnectionStatus>('disconnected')
   const [agentStatusText, setAgentStatusText] = useState('')
   const [roomName, setRoomName] = useState('')
@@ -25,7 +26,7 @@ export default function useLiveKitSession() {
     setAudioContext(ctx)
 
     try {
-      const data = await fetchToken()
+      const data = await fetchToken(undefined, undefined, mode)
       const room = new Room(createRoomOptions())
       roomRef.current = room
 
@@ -101,7 +102,7 @@ export default function useLiveKitSession() {
       ctx.close()
       setAudioContext(null)
     }
-  }, [addSegments])
+  }, [addSegments, mode])
 
   const cleanup = useCallback(() => {
     roomRef.current = null

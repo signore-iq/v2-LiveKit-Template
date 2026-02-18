@@ -1,6 +1,7 @@
-"""Pipeline voice agent: OpenAI STT → GPT-4o-mini → OpenAI TTS."""
+"""Voice agent that supports both pipeline and realtime sessions."""
 
 import logging
+import os
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -15,6 +16,12 @@ from livekit.plugins import openai, silero
 
 load_dotenv()
 logger = logging.getLogger("voice-agent")
+VALID_MODES = {"pipeline", "realtime"}
+DEFAULT_MODE = os.environ.get("AGENT_MODE", "pipeline").strip().lower()
+
+if DEFAULT_MODE not in VALID_MODES:
+    logger.warning("Invalid AGENT_MODE=%s, defaulting to pipeline", DEFAULT_MODE)
+    DEFAULT_MODE = "pipeline"
 
 server = AgentServer()
 
@@ -37,14 +44,32 @@ def prewarm(proc: JobProcess):
 server.setup_fnc = prewarm
 
 
+def resolve_room_mode(room_name: str) -> str:
+    if room_name.startswith("realtime-"):
+        return "realtime"
+    if room_name.startswith("pipeline-"):
+        return "pipeline"
+    return DEFAULT_MODE
+
+
 @server.rtc_session()
 async def entrypoint(ctx: JobContext):
-    session = AgentSession(
-        stt=openai.STT(model="whisper-1"),
-        llm=openai.LLM(model="gpt-4o-mini"),
-        tts=openai.TTS(model="tts-1", voice="alloy"),
-        vad=ctx.proc.userdata["vad"],
-    )
+    room_name = getattr(ctx.room, "name", "")
+    mode = resolve_room_mode(room_name)
+
+    logger.info("Starting %s session for room %s", mode, room_name)
+
+    if mode == "realtime":
+        session = AgentSession(
+            llm=openai.realtime.RealtimeModel(voice="coral"),
+        )
+    else:
+        session = AgentSession(
+            stt=openai.STT(model="whisper-1"),
+            llm=openai.LLM(model="gpt-4o-mini"),
+            tts=openai.TTS(model="tts-1", voice="alloy"),
+            vad=ctx.proc.userdata["vad"],
+        )
 
     await session.start(agent=VoiceAssistant(), room=ctx.room)
     await session.generate_reply(

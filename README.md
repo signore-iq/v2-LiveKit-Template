@@ -66,12 +66,14 @@ A **background worker process** (not a web server). Connects outbound to LiveKit
 3. Sends synthesized speech audio back
 4. Publishes transcriptions for both user and agent speech
 
-Supports two modes controlled by `AGENT_MODE`:
+Supports two modes selected by the web UI (`/pipeline` or `/realtime`):
 
 | Mode | Pipeline | Description |
 |------|----------|-------------|
 | `pipeline` | Whisper STT → GPT-4o-mini → TTS-1 | Separate models, more control |
 | `realtime` | OpenAI Realtime API | Single model, lower latency |
+
+`AGENT_MODE` is now a fallback default used only when a room name does not include a mode prefix.
 
 ### web-frontend — Test Interface
 
@@ -127,7 +129,7 @@ Local dev uses full UDP mode (no TCP-only restriction).
 | `LIVEKIT_API_KEY` | Shared with livekit-server |
 | `LIVEKIT_API_SECRET` | Shared with livekit-server |
 | `OPENAI_API_KEY` | Your OpenAI API key |
-| `AGENT_MODE` | `pipeline` (default) or `realtime` |
+| `AGENT_MODE` | Fallback mode (`pipeline` default) when room mode is not specified |
 
 ### web-frontend
 
