@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import { Room, RoomEvent, Track } from 'livekit-client'
-import type { RemoteTrack, RemoteTrackPublication, RemoteParticipant, TranscriptionSegment, Participant } from 'livekit-client'
+import type { RemoteTrack, RemoteTrackPublication, RemoteParticipant, RemoteAudioTrack, TranscriptionSegment, Participant } from 'livekit-client'
 import { fetchToken, createRoomOptions } from '@/lib/livekit'
 import type { AgentMode } from '@/lib/livekit'
 import type { ConnectionStatus } from '@/components/StatusBadge'
@@ -12,6 +12,7 @@ export default function useLiveKitSession(mode: AgentMode) {
   const [roomName, setRoomName] = useState('')
   const [localMicStream, setLocalMicStream] = useState<MediaStream | null>(null)
   const [agentAudioStream, setAgentAudioStream] = useState<MediaStream | null>(null)
+  const [agentAudioTrack, setAgentAudioTrack] = useState<RemoteAudioTrack | null>(null)
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null)
   const roomRef = useRef<Room | null>(null)
   const { segments, addSegments, clear: clearTranscript } = useTranscript()
@@ -37,6 +38,7 @@ export default function useLiveKitSession(mode: AgentMode) {
 
           const stream = track.mediaStream ?? new MediaStream([track.mediaStreamTrack])
           setAgentAudioStream(stream)
+          setAgentAudioTrack(track as RemoteAudioTrack)
           setAgentStatusText('Agent is speaking...')
         }
       })
@@ -44,6 +46,7 @@ export default function useLiveKitSession(mode: AgentMode) {
       room.on(RoomEvent.TrackUnsubscribed, (track: RemoteTrack) => {
         track.detach().forEach((el) => el.remove())
         setAgentAudioStream(null)
+        setAgentAudioTrack(null)
         setAgentStatusText('Listening...')
       })
 
@@ -64,6 +67,7 @@ export default function useLiveKitSession(mode: AgentMode) {
       room.on(RoomEvent.ParticipantDisconnected, (p) => {
         setAgentStatusText(`Agent disconnected: ${p.identity}`)
         setAgentAudioStream(null)
+        setAgentAudioTrack(null)
       })
 
       room.on(RoomEvent.Disconnected, () => {
@@ -111,6 +115,7 @@ export default function useLiveKitSession(mode: AgentMode) {
     setRoomName('')
     setLocalMicStream(null)
     setAgentAudioStream(null)
+    setAgentAudioTrack(null)
     setAudioContext((prev) => {
       prev?.close()
       return null
@@ -132,6 +137,7 @@ export default function useLiveKitSession(mode: AgentMode) {
     roomName,
     localMicStream,
     agentAudioStream,
+    agentAudioTrack,
     audioContext,
     segments,
     connect,
