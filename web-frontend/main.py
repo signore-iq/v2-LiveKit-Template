@@ -4,11 +4,21 @@ import os
 import uuid
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from livekit import api
 
 app = FastAPI(title="LiveKit Voice Agent")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 LIVEKIT_URL = os.environ.get("LIVEKIT_URL", "ws://localhost:7880")
 LIVEKIT_API_KEY = os.environ.get("LIVEKIT_API_KEY", "devkey")
