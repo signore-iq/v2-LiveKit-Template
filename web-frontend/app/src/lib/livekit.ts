@@ -23,18 +23,21 @@ export async function fetchToken(room?: string, identity?: string, mode?: AgentM
 export function createRoomOptions(): RoomOptions {
   return {
     audioCaptureDefaults: { autoGainControl: true, noiseSuppression: true },
-    adaptiveStream: true,
-    iceServers: [
-      {
-        urls: [
-          'turn:openrelay.metered.ca:80',
-          'turn:openrelay.metered.ca:443',
-          'turn:openrelay.metered.ca:80?transport=tcp',
-          'turn:openrelay.metered.ca:443?transport=tcp'
-        ],
-        username: '59379c96146d23fdd91e8989',
-        credential: 'nFfVaskf3D8LptJC'
-      }
-    ]
+    adaptiveStream: true
   }
+}
+
+export function createIceServers() {
+  return [
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:80?transport=tcp',
+        'turn:openrelay.metered.ca:443?transport=tcp'
+      ],
+      username: '59379c96146d23fdd91e8989',
+      credential: 'nFfVaskf3D8LptJC'
+    }
+  ]
 }

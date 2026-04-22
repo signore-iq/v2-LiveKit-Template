@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { Room, RoomEvent, Track } from 'livekit-client'
 import type { RemoteTrack, RemoteTrackPublication, RemoteParticipant, RemoteAudioTrack, TranscriptionSegment, Participant } from 'livekit-client'
-import { fetchToken, createRoomOptions } from '@/lib/livekit'
+import { fetchToken, createRoomOptions, createIceServers } from '@/lib/livekit'
 import type { AgentMode } from '@/lib/livekit'
 import type { ConnectionStatus } from '@/components/StatusBadge'
 import useTranscript from './useTranscript'
@@ -28,7 +28,9 @@ export default function useLiveKitSession(mode: AgentMode) {
 
     try {
       const data = await fetchToken(undefined, undefined, mode)
-      const room = new Room(createRoomOptions())
+      const room = new Room(createRoomOptions(), {
+        iceServers: createIceServers()
+      })
       roomRef.current = room
 
       room.on(RoomEvent.TrackSubscribed, (track: RemoteTrack, _pub: RemoteTrackPublication, _participant: RemoteParticipant) => {
