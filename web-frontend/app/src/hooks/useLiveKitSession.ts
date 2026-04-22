@@ -28,7 +28,8 @@ export default function useLiveKitSession(mode: AgentMode) {
 
     try {
       const data = await fetchToken(undefined, undefined, mode)
-      const room = new Room(createRoomOptions(), {
+      const room = new Room({
+        ...createRoomOptions(),
         iceServers: createIceServers()
       })
       roomRef.current = room
